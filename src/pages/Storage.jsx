@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 import { render } from "react-dom";
 
@@ -10,9 +10,9 @@ export function Storage() {
   const video8x10 = "BbcmoQPECJI";
   const video10x15 = "ZTOZ-Xtm9NE";
 
-  const videoCards = [
+  const originalVideoCards = [
     {
-      title: "5’X6’ (80 Sq. Ft.)",
+      title: "5’X6’ (30 Sq. Ft.)",
       image:
         "https://i2.wp.com/langleyministorage.com/wp-content/uploads/2013/08/7X10.png?resize=215%2C281&ssl=1",
       videoId: "NlKUrVs8yJc",
@@ -30,7 +30,7 @@ export function Storage() {
       videoId: "3jH7tQvA-Pw",
     },
     {
-      title: "15’X10’ (200 Sq. Ft.)",
+      title: "15’X10’ (150 Sq. Ft.)",
       image:
         "https://i2.wp.com/langleyministorage.com/wp-content/uploads/2013/08/10X10.png?resize=215%2C281&ssl=1",
       videoId: "kQSRWkdFt58",
@@ -47,6 +47,12 @@ export function Storage() {
         "https://i2.wp.com/langleyministorage.com/wp-content/uploads/2013/08/10x25.png?resize=215%2C281&ssl=1",
       videoId: "ZTOZ-Xtm9NE",
     },
+  ];
+
+  const videoCards = [
+    ...originalVideoCards.slice(-4), // Last 4 cards for left looping
+    ...originalVideoCards,
+    ...originalVideoCards.slice(0, 4), // First 4 cards for right looping
   ];
 
   const [activeIndex, setActiveIndex] = useState(null);
@@ -77,20 +83,49 @@ export function Storage() {
   const scrollLeft = () => {
     const container = scrollContainerRef.current;
     const cardWidth = 300 + 16; // Card width + gap
-    const maxScroll = 0;
-    const newPosition = Math.min(scrollPosition + cardWidth * 4, maxScroll);
-    setScrollPosition(newPosition);
-    container.scrollTo({ left: newPosition, behavior: "smooth" });
+    const cardsPerPage = 3;
+    const originalLength = 14;
+    const totalWidth = cardWidth * originalLength;
+    let newPosition = scrollPosition - cardWidth * cardsPerPage;
+
+    // If scrolling past the first duplicated card, reset to the end of the original set
+    if (newPosition < cardWidth * 4) {
+      newPosition += totalWidth;
+      setScrollPosition(newPosition);
+      container.scrollTo({ left: newPosition, behavior: "auto" });
+    } else {
+      setScrollPosition(newPosition);
+      container.scrollTo({ left: newPosition, behavior: "smooth" });
+    }
   };
 
   const scrollRight = () => {
     const container = scrollContainerRef.current;
     const cardWidth = 300 + 16; // Card width + gap
-    const maxScroll = container.scrollWidth - container.clientWidth;
-    const newPosition = Math.max(scrollPosition - cardWidth * 4, -maxScroll);
-    setScrollPosition(newPosition);
-    container.scrollTo({ left: newPosition, behavior: "smooth" });
+    const cardsPerPage = 3;
+    const originalLength = 14;
+    const totalWidth = cardWidth * originalLength;
+    let newPosition = scrollPosition + cardWidth * cardsPerPage;
+
+    // If scrolling past the last original card, reset to the start of the original set
+    if (newPosition >= cardWidth * (originalLength + 4)) {
+      newPosition -= totalWidth;
+      setScrollPosition(newPosition);
+      container.scrollTo({ left: newPosition, behavior: "auto" });
+    } else {
+      setScrollPosition(newPosition);
+      container.scrollTo({ left: newPosition, behavior: "smooth" });
+    }
   };
+
+  // Initialize scroll position to the start of the original set
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    const cardWidth = 300 + 16;
+    const initialPosition = cardWidth * 4; // Start at the first original card (after duplicates)
+    setScrollPosition(initialPosition);
+    container.scrollTo({ left: initialPosition, behavior: "auto" });
+  }, []);
 
   return (
     <>
@@ -2022,7 +2057,7 @@ export function Storage() {
                                 background: "none",
                                 border: "none",
                                 fontSize: "20px",
-                                color: "#000000",
+                                color: "white",
                                 cursor: "pointer",
                               }}
                             >

@@ -3,6 +3,9 @@ import "./App.css";
 import { Home } from "./pages/Home";
 import { Storage } from "./pages/Storage";
 import { CarStorage } from "./pages/CarStorage";
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
 
 function App() {
   return (
